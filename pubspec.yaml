@@ -1,0 +1,39 @@
+name: app_card_front
+description: Flutter frontend for AppCard Payment integration
+version: 1.0.0+1
+publish_to: 'none'
+environment:
+  sdk: '>=2.18.0 <3.0.0'
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.2
+  http: ^1.4.0
+  local_auth: ^2.1.5
+  crypto: ^3.0.2
+  uni_links: ^0.5.1
+  cryptography: ^2.7.0
+  convert: ^3.1.2
+  pointycastle: ^4.0.0
+  flutter_secure_storage: ^9.2.4
+  intl: ^0.20.2
+
+
+  
+dev_dependencies:
+  flutter_launcher_icons: ^0.14.3
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/wooribank_logo.jpeg
+    - assets/images/woori_card_vip.png
+    - assets/images/woori_card_general.png
+    - assets/images/woori_card_splash.jpg
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/app_icon.png"  # ← 앱 아이콘으로 쓸 이미지 경로
+  min_sdk_android: 21
