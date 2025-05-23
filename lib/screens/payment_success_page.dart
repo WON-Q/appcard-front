@@ -1,7 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class PaymentSuccessPage extends StatelessWidget {
-  const PaymentSuccessPage({Key? key}) : super(key: key);
+  final String txnId;
+  final String callbackUrl;
+  const PaymentSuccessPage({
+    Key? key,
+    required this.txnId,
+    required this.callbackUrl,
+  }) : super(key: key);
+
+  Future<void> _launchCallback() async {
+    final uri = Uri.parse(callbackUrl);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,33 +30,61 @@ class PaymentSuccessPage extends StatelessWidget {
         ),
         child: Column(
           children: [
-            // 상단 제목 영역
-            Container(
-              height: 56,
-              alignment: Alignment.center,
-              child: const Text(
-                '결제완료',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
+            // 상단 헤더: leading 버튼 + 타이틀
+            Row(
+              children: [
+                TextButton.icon(
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: const Size(60, 40),
+                    alignment: Alignment.centerLeft,
+                  ),
+                  onPressed: _launchCallback,
+                  icon: const Icon(
+                    Icons.arrow_back_ios,
+                    size: 20,
+                    color: Colors.black,
+                  ),
+                  label: const Text(
+                    'App Card',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 16,
+                    ),
+                  ),
                 ),
-              ),
+                const Expanded(
+                  child: Center(
+                    child: Text(
+                      '결제 진행',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 64), // leading 만큼 공간 확보
+              ],
             ),
             const Divider(height: 1),
             const Spacer(),
-            // 성공 아이콘
-            const Icon(
-              Icons.check_circle_outline,
-              color: Color(0xFF0083CA),
-              size: 100,
+            // 진행중 아이콘
+            SizedBox(
+              width: 100,
+              height: 100,
+              child: CircularProgressIndicator(
+                strokeWidth: 8,
+                color: Color(0xFF0083CA),
+              ),
             ),
             const SizedBox(height: 24),
-            // 성공 메시지
+            // 안내 메시지
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 24),
               child: Text(
-                '결제가 성공적으로 완료되었습니다!',
+                '이전 사이트에서 결제를 이어주세요.',
                 style: TextStyle(color: Colors.black, fontSize: 20),
                 textAlign: TextAlign.center,
               ),
@@ -67,9 +109,7 @@ class PaymentSuccessPage extends StatelessWidget {
                   ),
                   child: const Text(
                     '홈으로 돌아가기',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
               ),

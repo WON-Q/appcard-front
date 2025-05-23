@@ -45,13 +45,18 @@ class _AppCardFrontState extends State<AppCardFront> {
       final txn = uri.queryParameters['txn'];
       final merchant = uri.queryParameters['merchant'];
       final amount = uri.queryParameters['amount'];
-      if (txn != null && merchant != null && amount != null) {
+      final callbackUrl = uri.queryParameters['callbackUrl'];
+      if (txn != null &&
+          merchant != null &&
+          amount != null &&
+          callbackUrl != null) {
         _navKey.currentState?.push(
           MaterialPageRoute(
             builder: (_) => PaymentPage(
               txnId: txn,
               merchantName: merchant,
               amount: amount,
+              callbackUrl: callbackUrl,
             ),
           ),
         );

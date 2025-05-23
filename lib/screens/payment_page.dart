@@ -16,12 +16,14 @@ class PaymentPage extends StatefulWidget {
   final String txnId;
   final String merchantName;
   final String amount;
-  const PaymentPage({
-    Key? key,
-    required this.txnId,
-    required this.merchantName,
-    required this.amount,
-  }) : super(key: key);
+  final String callbackUrl;
+  const PaymentPage(
+      {Key? key,
+      required this.txnId,
+      required this.merchantName,
+      required this.amount,
+      required this.callbackUrl})
+      : super(key: key);
 
   @override
   State<PaymentPage> createState() => _PaymentPageState();
@@ -43,7 +45,7 @@ class _PaymentPageState extends State<PaymentPage> {
       'image': 'assets/images/wooribank_logo.jpeg',
       'cardImage': 'assets/images/woori_card_vip.png',
       'cardName': '우리은행 신용카드',
-      'cardNumber': '2029-1118-****-**',
+      'cardNumber': '1234567890123456',
     },
     {
       'cardId': 'APP_CARD_002',
@@ -51,7 +53,7 @@ class _PaymentPageState extends State<PaymentPage> {
       'image': 'assets/images/wooribank_logo.jpeg',
       'cardImage': 'assets/images/woori_card_general.png',
       'cardName': '우리은행 체크카드',
-      'cardNumber': '3429-1018-****-**',
+      'cardNumber': '1234567890123456',
     },
   ];
 
@@ -131,17 +133,18 @@ class _PaymentPageState extends State<PaymentPage> {
         body: body,
       );
 
-      if (verifyRes.statusCode != 200) throw Exception('서명 검증 실패');
+      if (verifyRes.statusCode != 200) throw Exception('서명 검증 실패거나 결제처리 실패');
+
       final Map<String, dynamic> verifyJson = jsonDecode(verifyRes.body);
-      final bool verified = verifyJson['verified'];
+      final bool verified = verifyJson['verified'] as bool;
 
       // 결과에 따른 처리 로직
       if (verified) {
-        showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          backgroundColor: Colors.transparent,
-          builder: (_) => const PaymentSuccessPage(),
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => PaymentSuccessPage(
+                txnId: widget.txnId, callbackUrl: widget.callbackUrl),
+          ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

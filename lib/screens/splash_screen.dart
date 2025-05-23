@@ -23,16 +23,19 @@ class _SplashScreenState extends State<SplashScreen> {
           uri.host == 'auth' &&
           uri.queryParameters['txn'] != null &&
           uri.queryParameters['merchant'] != null &&
-          uri.queryParameters['amount'] != null) {
+          uri.queryParameters['amount'] != null &&
+          uri.queryParameters['callbackUrl'] != null) {
         final txn = uri.queryParameters['txn']!;
         final merchantName = uri.queryParameters['merchant']!;
         final amount = uri.queryParameters['amount']!;
+        final callbackUrl = uri.queryParameters['callbackUrl']!;
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (_) => PaymentPage(
               txnId: txn,
               merchantName: merchantName,
               amount: amount,
+              callbackUrl: callbackUrl,
             ),
           ),
         );
