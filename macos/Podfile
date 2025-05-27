@@ -1,16 +1,20 @@
-platform :osx, '10.14'
+# 최소 macOS 버전을 Catalina(10.15) 이상으로 변경
+platform :osx, '10.15'
 
-# CocoaPods analytics sends network stats synchronously affecting flutter build latency.
+# CocoaPods analytics 비활성화 – 빌드 속도
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
 
 project 'Runner', {
-  'Debug' => :debug,
+  'Debug'   => :debug,
   'Profile' => :release,
   'Release' => :release,
 }
 
 def flutter_root
-  generated_xcode_build_settings_path = File.expand_path(File.join('..', 'Flutter', 'ephemeral', 'Flutter-Generated.xcconfig'), __FILE__)
+  generated_xcode_build_settings_path = File.expand_path(
+    File.join('..', 'Flutter', 'ephemeral', 'Flutter-Generated.xcconfig'),
+    __FILE__
+  )
   unless File.exist?(generated_xcode_build_settings_path)
     raise "#{generated_xcode_build_settings_path} must exist. If you're running pod install manually, make sure \"flutter pub get\" is executed first"
   end
@@ -30,6 +34,7 @@ target 'Runner' do
   use_frameworks!
 
   flutter_install_all_macos_pods File.dirname(File.realpath(__FILE__))
+
   target 'RunnerTests' do
     inherit! :search_paths
   end
@@ -37,6 +42,12 @@ end
 
 post_install do |installer|
   installer.pods_project.targets.each do |target|
+    # Flutter가 추가하는 기본 빌드 설정 적용
     flutter_additional_macos_build_settings(target)
+
+    # ▶︎ 모든 Pod의 Deployment Target을 10.15로 통일 ◀︎
+    target.build_configurations.each do |config|
+      config.build_settings['MACOSX_DEPLOYMENT_TARGET'] = '10.15'
+    end
   end
 end
