@@ -32,7 +32,7 @@ class PaymentPage extends StatefulWidget {
 class _PaymentPageState extends State<PaymentPage> {
   final LocalAuthentication _auth = LocalAuthentication();
   final _keyMgr = KeyManager();
-  static const _baseUrl = 'http://192.168.0.168:8080'; // 앱카드 서버 url
+  static const _baseUrl = 'http://192.168.0.168:8084'; // 앱카드 서버 url
 
   bool isChecked = false;
   int selectedIndex = 0;
@@ -49,7 +49,7 @@ class _PaymentPageState extends State<PaymentPage> {
     },
     {
       'cardId': 'APP_CARD_002',
-      'cardType': 'CHECK',
+      'cardType': 'DEBIT',
       'image': 'assets/images/wooribank_logo.jpeg',
       'cardImage': 'assets/images/woori_card_general.png',
       'cardName': '우리은행 체크카드',
@@ -143,7 +143,12 @@ class _PaymentPageState extends State<PaymentPage> {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (_) => PaymentSuccessPage(
-                txnId: widget.txnId, callbackUrl: widget.callbackUrl),
+              txnId: widget.txnId,
+              callbackUrl: widget.callbackUrl,
+              cardImage: methods[selectedIndex]['cardImage']!,
+              amount: widget.amount,
+              merchantName: widget.merchantName,
+            ),
           ),
         );
       } else {

@@ -45,6 +45,7 @@ Future<void> main() async {
   Uri? initialUri;
   try {
     initialUri = await getInitialUri();
+    print('▶️ 앱 실행 시 initialUri: $initialUri');
   } catch (e) {
     debugPrint('getInitialUri error: $e');
   }
@@ -53,9 +54,9 @@ Future<void> main() async {
 }
 
 Future<void> registerFcmToken() async {
-  const _baseUrl = 'http://192.168.0.168:8080';
+  const _baseUrl = 'http://192.168.0.168:8084';
   final token = await FirebaseMessaging.instance.getToken();
-  print(token);
+  print("token : ${token}");
   if (token != null) {
     await http.post(
       Uri.parse('$_baseUrl/notifications/registerToken'),
@@ -127,7 +128,11 @@ class _AppCardFrontState extends State<AppCardFront> {
 
     // 딥링크 처리
     _sub = uriLinkStream.listen((uri) {
-      if (uri != null) _navigateFromData(uri.queryParameters);
+      print('▶️ onUriLinkStream: $uri');
+      if (uri != null) {
+        print('   • queryParameters: ${uri.queryParameters}');
+        _navigateFromData(uri.queryParameters);
+      }
     });
   }
 
@@ -136,6 +141,7 @@ class _AppCardFrontState extends State<AppCardFront> {
     final m = data['merchant'] as String?;
     final amt = data['amount'] as String?;
     final cb = data['callbackUrl'] as String?;
+    print('▶️ _navigateFromData cb: $cb');
     if (txn != null && m != null && amt != null && cb != null) {
       _navKey.currentState?.push(MaterialPageRoute(
         builder: (_) => PaymentPage(

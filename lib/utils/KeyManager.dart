@@ -8,7 +8,7 @@ import 'package:http/http.dart' as http;
 
 class KeyManager {
   final _storage = const FlutterSecureStorage();
-  static const _baseUrl = 'http://192.168.0.168:8080';
+  static const _baseUrl = 'http://192.168.0.168:8084';
   //192.168.0.168
   /// 카드 하나당 한 번만 호출: Ed25519 키페어 생성 → 비밀키만 로컬에, 공개키는 서버에 전송
   Future<void> generateAndStoreKeyPair(String cardId) async {

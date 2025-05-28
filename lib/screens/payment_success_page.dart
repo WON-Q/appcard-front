@@ -1,17 +1,56 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:intl/intl.dart';
 
-class PaymentSuccessPage extends StatelessWidget {
+class PaymentSuccessPage extends StatefulWidget {
   final String txnId;
   final String callbackUrl;
+  final String cardImage;
+  final String amount;
+  final String merchantName;
+
   const PaymentSuccessPage({
     Key? key,
     required this.txnId,
     required this.callbackUrl,
+    required this.cardImage,
+    required this.amount,
+    required this.merchantName,
   }) : super(key: key);
 
+  @override
+  State<PaymentSuccessPage> createState() => _PaymentSuccessPageState();
+}
+
+class _PaymentSuccessPageState extends State<PaymentSuccessPage> {
+  int _counter = 3;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    // 1초마다 카운트다운
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_counter == 1) {
+        timer.cancel();
+        _launchCallback();
+        Navigator.of(context).popUntil((r) => r.isFirst);
+      } else {
+        setState(() => _counter--);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
   Future<void> _launchCallback() async {
-    final uri = Uri.parse(callbackUrl);
+    final uri = Uri.parse(widget.callbackUrl);
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     }
@@ -19,97 +58,145 @@ class PaymentSuccessPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final height = MediaQuery.of(context).size.height * 0.9;
+    final formatter = NumberFormat('#,###원');
+    final formattedAmount = formatter.format(int.tryParse(widget.amount) ?? 0);
 
-    return SafeArea(
-      child: Container(
-        height: height,
-        decoration: const BoxDecoration(
-          color: Color(0xFFDCEAF6),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-        ),
-        child: Column(
+    return Scaffold(
+      backgroundColor: const Color(0xFFDCEAF6),
+      body: SafeArea(
+        child: Stack(
           children: [
-            // 상단 헤더: leading 버튼 + 타이틀
-            Row(
-              children: [
-                TextButton.icon(
-                  style: TextButton.styleFrom(
-                    padding: EdgeInsets.zero,
-                    minimumSize: const Size(60, 40),
-                    alignment: Alignment.centerLeft,
-                  ),
-                  onPressed: _launchCallback,
-                  icon: const Icon(
-                    Icons.arrow_back_ios,
-                    size: 20,
-                    color: Colors.black,
-                  ),
-                  label: const Text(
-                    'App Card',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
-                const Expanded(
-                  child: Center(
-                    child: Text(
-                      '결제 진행',
+            // 닫기(X) 버튼
+            Positioned(
+              top: 16,
+              right: 16,
+              child: GestureDetector(
+                onTap: () {
+                  _timer?.cancel();
+                  _launchCallback();
+                  Navigator.of(context).popUntil((r) => r.isFirst);
+                },
+                child: const Icon(Icons.close, size: 28, color: Colors.black87),
+              ),
+            ),
+
+            // 메인 컨텐츠
+            Align(
+              alignment: Alignment.center,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // 제목
+                    const Text(
+                      '결제완료',
                       style: TextStyle(
-                        color: Colors.black,
+                        color: Colors.black87,
+                        fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        fontSize: 20,
                       ),
                     ),
-                  ),
+
+                    const SizedBox(height: 24),
+
+                    // 카드 이미지
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.asset(
+                        widget.cardImage,
+                        width: 300,
+                        height: 180,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+
+                    const SizedBox(height: 32),
+
+                    // 안내 문구 (줄바꿈 포함)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          '${widget.merchantName} $formattedAmount',
+                          style: const TextStyle(
+                            color: Colors.black87,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          '결제요청이 안전하게 처리되었습니다.',
+                          style: TextStyle(
+                            color: Colors.black87,
+                            fontSize: 16,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          '[확인] 버튼을 누르신 후,',
+                          style: TextStyle(
+                            color: Colors.black54,
+                            fontSize: 14,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          '이전 화면으로 돌아가야 결제가 완료됩니다.',
+                          style: TextStyle(
+                            color: Colors.black54,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 24),
+                        // 카운트다운 표시
+                        Text(
+                          '$_counter',
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 64), // leading 만큼 공간 확보
-              ],
-            ),
-            const Divider(height: 1),
-            const Spacer(),
-            // 진행중 아이콘
-            SizedBox(
-              width: 100,
-              height: 100,
-              child: CircularProgressIndicator(
-                strokeWidth: 8,
-                color: Color(0xFF0083CA),
               ),
             ),
-            const SizedBox(height: 24),
-            // 안내 메시지
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24),
-              child: Text(
-                '이전 사이트에서 결제를 이어주세요.',
-                style: TextStyle(color: Colors.black, fontSize: 20),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            const Spacer(),
-            // 홈으로 돌아가기 버튼
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+
+            // 확인 버튼
+            Positioned(
+              bottom: 24,
+              left: 24,
+              right: 24,
               child: SizedBox(
-                width: double.infinity,
-                height: 48,
+                height: 50,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.of(context).popUntil((route) => route.isFirst);
+                    _timer?.cancel();
+                    _launchCallback();
+                    Navigator.of(context).popUntil((r) => r.isFirst);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
                   child: const Text(
-                    '홈으로 돌아가기',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    '확인',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
