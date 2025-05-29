@@ -36,8 +36,8 @@ class _PaymentPageState extends State<PaymentPage> {
 
   bool isChecked = false;
   int selectedIndex = 0;
-  final PageController _controller = PageController(viewportFraction: 0.8);
-
+  final PageController _controller = PageController(viewportFraction: 0.6);
+  String imageUrl = 'assets/images/wooribank_logo.jpeg';
   final List<Map<String, String>> methods = [
     {
       'cardId': 'APP_CARD_001',
@@ -52,8 +52,8 @@ class _PaymentPageState extends State<PaymentPage> {
       'cardType': 'DEBIT',
       'image': 'assets/images/wooribank_logo.jpeg',
       'cardImage': 'assets/images/woori_card_general.png',
-      'cardName': '우리은행 체크카드',
-      'cardNumber': '1234567890123456',
+      'cardName': 'D4카드의정석Ⅱ',
+      'cardNumber': '9490941540591016',
     },
   ];
 
@@ -164,13 +164,26 @@ class _PaymentPageState extends State<PaymentPage> {
     }
   }
 
+  String _maskCardNumber(String number) {
+    if (number.length < 8) return number;
+    final first = number.substring(0, 4);
+    final last = number.substring(number.length - 4);
+    final middle = List.filled(number.length - 8, '*').join();
+    // 4자리마다 공백을 넣고 싶다면, 아래처럼 포맷팅 추가 가능
+    final raw = '$first$middle$last';
+    return raw.replaceAllMapped(RegExp(r'.{4}'), (m) => '${m.group(0)} ');
+  }
+
   @override
   Widget build(BuildContext context) {
+    final displayNumber =
+        _maskCardNumber(methods[selectedIndex]['cardNumber']!);
     final formatter = NumberFormat('#,###');
     final formattedAmount = formatter.format(int.parse(widget.amount));
 
     const bgColor = Color(0xFFDCEAF6);
     const primaryColor = Color(0xFF0083CA);
+
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
@@ -188,52 +201,67 @@ class _PaymentPageState extends State<PaymentPage> {
       ),
       body: Column(
         children: [
-          const SizedBox(height: 16),
+          const SizedBox(height: 30),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: RichText(
-              text: TextSpan(
-                style: const TextStyle(
-                  fontSize: 23,
-                  color: Colors.black87,
-                  fontWeight: FontWeight.w500, // 기본 weight
-                ),
-                children: [
-                  TextSpan(
-                    text: widget.merchantName,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold, // merchantName만 bold
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center, // 수평 중앙 정렬
+              crossAxisAlignment: CrossAxisAlignment.center, // 수직 중앙 정렬
+              children: [
+                Column(
+                  crossAxisAlignment:
+                      CrossAxisAlignment.center, // 컬럼 안 텍스트도 가운데
+                  children: [
+                    Text(
+                      methods[selectedIndex]['cardName']!,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        // fontFamily: 'WooriFont',
+                        // fontWeight: FontWeight.w700,
+                        color: Colors.black,
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                    const SizedBox(height: 4),
+                    Text(
+                      displayNumber,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 18),
           SizedBox(
-            height: 300,
+            width: 350,
+            height: 190,
             child: PageView.builder(
               controller: _controller,
+              clipBehavior: Clip.none, // 자식 overflow 허용
               itemCount: methods.length,
               onPageChanged: (i) => setState(() => selectedIndex = i),
               itemBuilder: (ctx, i) {
                 final m = methods[i];
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Opacity(
-                    opacity: i == selectedIndex ? 1.0 : 0.5,
-                    child: PaymentMethodItem(
-                      isSelected: i == selectedIndex,
-                      backgroundColor: Colors.white,
-                      onTap: () => _controller.animateToPage(
-                        i,
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
+                final isSel = i == selectedIndex;
+                return Center(
+                  // Center로 감싸서 남는 좌우 공간 안에서 가운데 위치
+                  child: Transform.scale(
+                    scale: isSel ? 1.1 : 0.9,
+                    child: Opacity(
+                      opacity: isSel ? 1 : 0.5,
+                      child: PaymentMethodItem(
+                        isSelected: isSel,
+                        onTap: () => _controller.animateToPage(
+                          i,
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        ),
+                        cardImagePath: m['cardImage']!,
                       ),
-                      imagePath: m['image']!,
-                      cardImagePath: m['cardImage']!,
-                      cardName: m['cardName']!,
-                      cardNumber: m['cardNumber']!,
                     ),
                   ),
                 );
@@ -241,37 +269,37 @@ class _PaymentPageState extends State<PaymentPage> {
             ),
           ),
           const SizedBox(height: 32),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: [
-                Transform.scale(
-                  scale: 1.2,
-                  child: Checkbox(
-                    value: isChecked,
-                    onChanged: (v) => setState(() => isChecked = v ?? false),
-                    fillColor: WidgetStateProperty.all(Colors.white),
-                    checkColor: Colors.black,
-                    side: WidgetStateBorderSide.resolveWith(
-                        (_) => BorderSide(color: primaryColor, width: 2)),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                const Expanded(
-                  child: Text(
-                    '필수 결제 정보 확인 및 동의',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          // Padding(
+          //   padding: const EdgeInsets.symmetric(horizontal: 16),
+          //   child: Row(
+          //     children: [
+          //       Transform.scale(
+          //         scale: 1.2,
+          //         child: Checkbox(
+          //           value: isChecked,
+          //           onChanged: (v) => setState(() => isChecked = v ?? false),
+          //           fillColor: WidgetStateProperty.all(Colors.white),
+          //           checkColor: Colors.black,
+          //           side: WidgetStateBorderSide.resolveWith(
+          //               (_) => BorderSide(color: primaryColor, width: 2)),
+          //           shape: RoundedRectangleBorder(
+          //             borderRadius: BorderRadius.circular(4),
+          //           ),
+          //         ),
+          //       ),
+          //       const SizedBox(width: 8),
+          //       const Expanded(
+          //         child: Text(
+          //           '필수 결제 정보 확인 및 동의',
+          //           style: TextStyle(
+          //             color: Colors.black,
+          //             fontWeight: FontWeight.bold,
+          //           ),
+          //         ),
+          //       ),
+          //     ],
+          //   ),
+          // ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Container(
@@ -312,34 +340,18 @@ class _PaymentPageState extends State<PaymentPage> {
               width: double.infinity,
               height: 56,
               child: ElevatedButton(
+                onPressed: isChecked ? _onPayPressed : null,
                 style: ButtonStyle(
-                  backgroundColor: WidgetStateProperty.resolveWith((states) {
-                    if (states.contains(WidgetState.disabled)) {
-                      return Colors.white;
-                    }
-                    return primaryColor;
-                  }),
-                  foregroundColor: WidgetStateProperty.resolveWith((states) {
-                    if (states.contains(WidgetState.disabled)) {
-                      return primaryColor;
-                    }
-                    return Colors.white;
-                  }),
-                  side: WidgetStateProperty.resolveWith((states) {
-                    if (states.contains(WidgetState.disabled)) {
-                      return BorderSide(color: primaryColor, width: 2);
-                    }
-                    return null;
-                  }),
+                  backgroundColor: WidgetStateProperty.all(primaryColor),
+                  foregroundColor: WidgetStateProperty.all(Colors.white),
                   shape: WidgetStateProperty.all(
                     RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                 ),
-                onPressed: isChecked ? _onPayPressed : null,
                 child: const Text(
-                  '결제하기',
+                  '동의 후 결제하기',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
