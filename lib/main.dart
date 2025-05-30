@@ -168,3 +168,36 @@ class _AppCardFrontState extends State<AppCardFront> {
     );
   }
 }
+// import 'package:app_card_front/screens/payment_success_page.dart';
+// import 'package:flutter/material.dart';
+
+// final GlobalKey<NavigatorState> _navKey = GlobalKey<NavigatorState>();
+
+// class MyApp extends StatefulWidget {
+//   // final Uri initialUri; // 원래 있던 값
+//   const MyApp({Key? key}) : super(key: key);
+
+//   @override
+//   State<MyApp> createState() => _MyAppState();
+// }
+
+// class _MyAppState extends State<MyApp> {
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       navigatorKey: _navKey,
+//       // SplashScreen(initialUri: widget.initialUri),
+//       home: PaymentSuccessPage(
+//         txnId: 'DUMMY_TXN_1234',
+//         callbackUrl: 'https://example.com/callback',
+//         cardImage: 'assets/images/woori_card_vip.png',
+//         amount: '10000',
+//         merchantName: '테스트 상점',
+//       ),
+//     );
+//   }
+// }
+
+// void main() {
+//   runApp(const MyApp());
+// }

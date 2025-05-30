@@ -33,10 +33,26 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
+    - assets/animations/payment_check.gif
     - assets/images/wooribank_logo.jpeg
     - assets/images/woori_card_vip.png
     - assets/images/woori_card_general.png
+    - assets/images/woori_card_kpass.png
     - assets/images/woori_card_splash.jpg
+    - assets/images/woori_wibe.png
+    - assets/images/woori_wibe_hi.png
+    - assets/icons/app_icon.png
+  fonts:
+    - family: WooridaumB
+      fonts:
+        - asset: assets/fonts/WooridaumB.otf
+    - family: WooridaumL
+      fonts:
+        - asset: assets/fonts/WooridaumL.otf
+    - family: WooridaumR
+      fonts:
+        - asset: assets/fonts/WooridaumR.otf
+
 flutter_launcher_icons:
   android: true
   ios: true
